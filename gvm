@@ -3,6 +3,33 @@
 # 获取版本信息
 #curl -sSf https://api.github.com/repos/golang/go/branches |grep name |grep release |awk '{printf $2"\n"}' | cut -c17- |tr -d '",'
 # 下载相应版本go1.12.9.linux-amd64.tar.gz
+{
+    base=".gvm"
+    base_dir=${HOME}${base}
+    if [[ $1 == "list" && $2 == "" ]];then
+        printf -- "list\n"
+    fi
+
+    if [[ $1 ==  "list" &&  $2 ==  "all" ]];then
+        printf -- "list all\n"
+    fi
+
+    if [[ $1 == "add" || $1 == "install" ]];then
+        printf -- "add && install\n"
+    fi
+
+    if [[ $1 == "remove" || $1 == "uninstall" ]];then
+        printf -- "remove && uninstall\n"
+    fi
+    
+    if [[ $1 == "use" ||  $1 == "select" ]];then
+        printf -- "use && select\n"
+    fi
+
+}
+exit 0
+
+
 base_dir=$HOME"/.gvm"
 
 if [[ ! -d $base_dir ]] ; then
