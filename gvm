@@ -1,0 +1,32 @@
+#!/bin/env bash
+#https://api.github.com/repos/golang/go/branches
+# 获取版本信息
+#curl -sSf https://api.github.com/repos/golang/go/branches |grep name |grep release |awk '{printf $2"\n"}' | cut -c17- |tr -d '",'
+# 下载相应版本go1.12.9.linux-amd64.tar.gz
+base_dir=$HOME"/.gvm"
+
+if [[ ! -d $base_dir ]] ; then
+    mkdir -p  $base_dir
+fi
+
+echo "[1/3]"
+if [[ ! -e "${base_dir}/tar/go1.12.9.linux-amd64.tar.gz" ]] ; then
+    echo "downloading..."
+    wget -qP  $base_dir/tar  https://dl.google.com/go/go1.12.9.linux-amd64.tar.gz
+fi
+
+echo "[2/3]"
+if [[ ! -d "$base_dir/go1.12.9" ]] ;then
+    echo "downloading......"
+    tar xzf $base_dir/tar/go1.12.9.linux-amd64.tar.gz -C $base_dir
+    mv $base_dir/go $base_dir/go1.12.9
+fi
+
+echo "[3/3]"
+echo export GOROOT="${base_dir}/go1.12.9" > ${HOME}/.gvmrc
+echo export GOTOOLDIR="${GOROOT}/pkg/tool/linux_amd64" >> ${HOME}/.gvmrc
+echo export GOBIN="${base_dir}/bin" >> ${HOME}/.gvmrc
+echo export GVM=true >> ${HOME}/.gvmrc
+if [[ ! $GVM ]]; then
+    [[ -s "${HOME}/.gvmrc" ]] &&  echo source "${HOME}/.gvmrc" >> ${HOME}/.zshrc
+fi
