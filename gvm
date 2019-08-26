@@ -40,6 +40,12 @@
         if [[ ! -e "${base_dir}/tar/${2}.${file_os}-amd64.tar.gz" ]] ; then
             echo "downloading..."
             wget -qP  $base_dir/tar  https://dl.google.com/go/${2}.${file_os}-amd64.tar.gz
+            #https://raw.githubusercontent.com/golang/go/release-branch.go1.13/VERSION
+            if [[ $? != 0 ]] ;then
+                 version_rc="`wget -qO-  https://raw.githubusercontent.com/golang/go/release-branch.${2}/VERSION`"
+                 wget -qP  $base_dir/tar  https://dl.google.com/go/${version_rc}.${file_os}-amd64.tar.gz
+                 mv ${base_dir}/tar/${version_rc}.${file_os}-amd64.tar.gz ${base_dir}/tar/${2}.${file_os}-amd64.tar.gz
+            fi
         fi
         printf -- "[2/4] 开始解压...\n"
         if [[ ! -d "${base_dir}/${2}" ]] ;then
@@ -58,8 +64,12 @@
             GOPATH="${HOME}/go"
         fi
         cp ${gvm_path}/go ${GOPATH}/bin/go
-        cp ${gvm_path}/godoc ${GOPATH}/bin/godoc
-        cp ${gvm_path}/gofmt ${GOPATH}/bin/gofmt
+        if [[ -e ${gvm_path}/godoc ]] ;then
+            cp ${gvm_path}/godoc ${GOPATH}/bin/godoc
+        fi
+        if [[ -e ${gvm_path}/gofmt ]] ;then
+            cp ${gvm_path}/gofmt ${GOPATH}/bin/gofmt
+        fi
         printf -- "[4/4] 安装完成"
         gvm sersion
     fi
