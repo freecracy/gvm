@@ -49,7 +49,7 @@
         fi
         printf -- "[3/4] 开始安装...\n"
         echo export GOROOT="${base_dir}/${2}" > ${HOME}/.gvmrc
-        echo export GOTOOLDIR="${base_dir}/${2}/pkg/tool/linux_amd64" >> ${HOME}/.gvmrc
+        echo export GOTOOLDIR="${base_dir}/${2}/pkg/tool/${file_os}_amd64" >> ${HOME}/.gvmrc
         echo export GOBIN="${base_dir}/${2}/bin" >> ${HOME}/.gvmrc
         echo export GVM=true >> ${HOME}/.gvmrc
         echo export GVM_VERSION=$2 >> ${HOME}/.gvmrc
