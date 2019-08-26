@@ -5,13 +5,23 @@
 # 下载相应版本go1.12.9.linux-amd64.tar.gz
 {
     base=".gvm"
-    base_dir=${HOME}${base}
+    base_dir="${HOME}/${base}"
     if [[ $1 == "list" && $2 == "" ]];then
         printf -- "list\n"
+        for line in $(ls ${base_dir})  ;do
+            if [[ $line == "tar" ]] ; then
+                continue
+            fi
+            printf -- $line"\n"
+        done
     fi
 
-    if [[ $1 ==  "list" &&  $2 ==  "all" ]];then
+    if [[ $1 ==  "listall" ]];then
         printf -- "list all\n"
+        version_all=$(curl -sSf https://api.github.com/repos/golang/go/branches |grep name |grep release |awk '{printf $2"\n"}' | cut -c17- |tr -d '",')
+        for version in $version_all ;do
+             printf -- $version"\n"
+        done
     fi
 
     if [[ $1 == "add" || $1 == "install" ]];then
@@ -20,6 +30,12 @@
 
     if [[ $1 == "remove" || $1 == "uninstall" ]];then
         printf -- "remove && uninstall\n"
+        if [[ $2 == "gvm" ]];then
+            sudo rm -rf /usr/local/bin && rm -rf ${base_dir} && rm -rf  "${HOME}/.gvmrc"        
+        fi
+        if [[ -d "${base_dir}/${2}" ]] ;then
+            rm -rf "${base_dir}/${2}"
+        fi
     fi
     
     if [[ $1 == "use" ||  $1 == "select" ]];then
