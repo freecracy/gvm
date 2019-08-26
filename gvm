@@ -6,6 +6,11 @@
 {
     base=".gvm"
     base_dir="${HOME}/${base}"
+    
+    if [[ ! -d $base_dir ]] ; then
+        mkdir -p  $base_dir
+    fi
+
     if [[ $1 == "list" && $2 == "" ]];then
         printf -- "list\n"
         for line in $(ls ${base_dir})  ;do
@@ -24,8 +29,34 @@
         done
     fi
 
-    if [[ $1 == "add" || $1 == "install" ]];then
+    if [[ $1 == "add" || $1 == "install" && $2 != "" ]];then
         printf -- "add && install\n"
+        printf -- "[1/4] 开始下载...\n"
+        if [[ ! -e "${base_dir}/tar/${2}.linux-amd64.tar.gz" ]] ; then
+            echo "downloading..."
+            wget -qP  $base_dir/tar  https://dl.google.com/go/${2}.linux-amd64.tar.gz
+        fi
+        printf -- "[2/4] 开始解压...\n"
+        if [[ ! -d "${base_dir}/${2}" ]] ;then
+            echo "unzip......"
+            tar xzf $base_dir/tar/${2}.linux-amd64.tar.gz -C $base_dir
+            mv "${base_dir}/go" "${base_dir}/${2}"
+        fi
+        printf -- "[3/4] 开始安装...\n"
+        echo export GOROOT="${base_dir}/${2}" > ${HOME}/.gvmrc
+        echo export GOTOOLDIR="${base_dir}/${2}/pkg/tool/linux_amd64" >> ${HOME}/.gvmrc
+        echo export GOBIN="${base_dir}/${2}/bin" >> ${HOME}/.gvmrc
+        echo export GVM=true >> ${HOME}/.gvmrc
+        echo export GVM_VERSION=$2 >> ${HOME}/.gvmrc
+        gvm_path="${base_dir}/${2}/bin"
+        if [[ -z $GOPATH ]] ;then
+            GOPATH="${HOME}/go"
+        fi
+        cp ${gvm_path}/go ${GOPATH}/bin/go
+        cp ${gvm_path}/godoc ${GOPATH}/bin/godoc
+        cp ${gvm_path}/gofmt ${GOPATH}/bin/gofmt
+        printf -- "[4/4] 安装完成"
+        gvm sersion
     fi
 
     if [[ $1 == "remove" || $1 == "uninstall" ]];then
@@ -38,8 +69,40 @@
         fi
     fi
     
-    if [[ $1 == "use" ||  $1 == "select" ]];then
+    if [[ $1 == "use" ||  $1 == "select" && $2 != "" ]];then
         printf -- "use && select\n"
+        if [[ ! -d "${base_dir}/${2}" ]];then
+            gvm add $2
+        fi
+        echo export GOROOT="${base_dir}/${2}" > ${HOME}/.gvmrc
+        echo export GOTOOLDIR="${base_dir}/${2}/pkg/tool/linux_amd64" >> ${HOME}/.gvmrc
+        echo export GOBIN="${base_dir}/${2}/bin" >> ${HOME}/.gvmrc
+        echo export GVM=true >> ${HOME}/.gvmrc
+        echo export GVM_VERSION=$2 >> ${HOME}/.gvmrc
+        gvm_path="${base_dir}/${2}/bin"
+        if [[ -z $GOPATH ]] ;then
+            GOPATH="${HOME}/go"
+        fi
+        cp ${gvm_path}/go ${GOPATH}/bin/go
+        cp ${gvm_path}/godoc ${GOPATH}/bin/godoc
+        cp ${gvm_path}/gofmt ${GOPATH}/bin/gofmt
+    fi
+
+    if [[ $1 == "version" || $1 == "-v" ]] ; then
+        if command -v go > /dev/null ;then
+            go version
+        fi
+    fi
+
+    if [[ $1 == "help" || $1 == "-h" || $1 = "" ]] ; then
+        printf -- "Use Age:\n"
+        printf -- "    gvm list\n"
+        printf -- "    gvm listall\n"
+        printf -- "    gvm add\n"
+        printf -- "    gvm use\n"
+        printf -- "    gvm version\n"
+        printf -- "    gvm remove\n"
+        printf -- "    gvm help\n"
     fi
 
 }
