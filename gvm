@@ -6,6 +6,11 @@
 {
     base=".gvm"
     base_dir="${HOME}/${base}"
+    os=$(uname -s)
+    file_os="linux" 
+    if [[ $os == "Darwin" ]]; then
+         file_os="darwin"
+    fi
     
     if [[ ! -d $base_dir ]] ; then
         mkdir -p  $base_dir
@@ -32,14 +37,14 @@
     if [[ $1 == "add" || $1 == "install" && $2 != "" ]];then
         printf -- "add && install\n"
         printf -- "[1/4] 开始下载...\n"
-        if [[ ! -e "${base_dir}/tar/${2}.linux-amd64.tar.gz" ]] ; then
+        if [[ ! -e "${base_dir}/tar/${2}.${file_os}-amd64.tar.gz" ]] ; then
             echo "downloading..."
-            wget -qP  $base_dir/tar  https://dl.google.com/go/${2}.linux-amd64.tar.gz
+            wget -qP  $base_dir/tar  https://dl.google.com/go/${2}.${file_os}-amd64.tar.gz
         fi
         printf -- "[2/4] 开始解压...\n"
         if [[ ! -d "${base_dir}/${2}" ]] ;then
             echo "unzip......"
-            tar xzf $base_dir/tar/${2}.linux-amd64.tar.gz -C $base_dir
+            tar xzf $base_dir/tar/${2}.${file_os}-amd64.tar.gz -C $base_dir
             mv "${base_dir}/go" "${base_dir}/${2}"
         fi
         printf -- "[3/4] 开始安装...\n"

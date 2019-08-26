@@ -3,7 +3,7 @@
 # 安装
 ## mac
 ```
-# 暂未支持mac
+# 暂未支持mac,可使用ubuntu安装方式
 brew tab install freecracy/gvm
 ```
 ## ubuntu
