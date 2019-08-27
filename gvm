@@ -63,6 +63,7 @@
         if [[ -z $GOPATH ]] ;then
             GOPATH="${HOME}/go"
         fi
+        [[ ! -d ${GOPATH}/bin ]] && mkdir -p ${GOPATH}/bin
         cp ${gvm_path}/go ${GOPATH}/bin/go
         if [[ -e ${gvm_path}/godoc ]] ;then
             cp ${gvm_path}/godoc ${GOPATH}/bin/godoc
@@ -81,6 +82,7 @@
         fi
         if [[ -d "${base_dir}/${2}" ]] ;then
             rm -rf "${base_dir}/${2}"
+            [[ -f ${GOPATH}/bin/go ]] && rm -rf ${GOPATH}/bin/go
         fi
     fi
     

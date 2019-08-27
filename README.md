@@ -1,14 +1,17 @@
 # 简介
+go语言版本管理,自用,非侵入.
 
 # 安装
 ## mac
 ```
-# 暂未支持mac,可使用ubuntu安装方式
-brew tab install freecracy/gvm
+brew install freecracy/gvm
 ```
 ## ubuntu
 ```bash
-wget -q https://raw.githubusercontent.com/freecracy/gvm/master/gvm && sudo mv gvm /usr/local/bin/gvm && sudo  chmod +x /usr/local/bin/gvm 
+#root用户
+curl -sSfo gvm https://raw.githubusercontent.com/freecracy/gvm/master/gvm && mv gvm /usr/local/bin/gvm && chmod +x /usr/local/bin/gvm
+#非root用户
+curl -sSfo gvm https://raw.githubusercontent.com/freecracy/gvm/master/gvm && sudo mv gvm /usr/local/bin/gvm && sudo  chmod +x /usr/local/bin/gvm
 ```
 # 使用
 ```bash
