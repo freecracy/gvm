@@ -3,11 +3,16 @@
 # 获取版本信息
 #curl -sSf https://api.github.com/repos/golang/go/branches |grep name |grep release |awk '{printf $2"\n"}' | cut -c17- |tr -d '",'
 # 下载相应版本go1.12.9.linux-amd64.tar.gz
+set -e 
+set -u 
+set -o pipefail
 {
+
     base=".gvm"
     base_dir="${HOME}/${base}"
     os=$(uname -s)
     file_os="linux" 
+
     if [[ $os == "Darwin" ]]; then
          file_os="darwin"
     fi
@@ -17,7 +22,7 @@
     fi
 
     if [[ $1 == "list" && $2 == "" ]];then
-        printf -- "list\n"
+       # printf -- "list\n"
         for line in $(ls ${base_dir})  ;do
             if [[ $line == "tar" ]] ; then
                 continue
@@ -27,7 +32,7 @@
     fi
 
     if [[ $1 ==  "listall" ]];then
-        printf -- "list all\n"
+        #printf -- "list all\n"
         version_all=$(curl -sSf https://api.github.com/repos/golang/go/branches |grep name |grep release |awk '{printf $2"\n"}' | cut -c17- |tr -d '",')
         for version in $version_all ;do
              printf -- $version"\n"
@@ -35,23 +40,28 @@
     fi
 
     if [[ $1 == "add" || $1 == "install" && $2 != "" ]];then
-        printf -- "add && install\n"
+        #printf -- "add && install\n"
         printf -- "[1/4] 开始下载...\n"
+        version=$2
         if [[ ! -e "${base_dir}/tar/${2}.${file_os}-amd64.tar.gz" ]] ; then
             echo "downloading..."
-            wget -qP  $base_dir/tar  https://dl.google.com/go/${2}.${file_os}-amd64.tar.gz
+            #wget -qP  $base_dir/tar  https://dl.google.com/go/${2}.${file_os}-amd64.tar.gz
+            mkdir -p $base_dir/tar
+            curl -sL https://dl.google.com/go/${2}.${file_os}-amd64.tar.gz > $base_dir/tar/$2.$file_os-amd64.tar.gz
             #https://raw.githubusercontent.com/golang/go/release-branch.go1.13/VERSION
             if [[ $? != 0 ]] ;then
-                 version_rc="`wget -qO-  https://raw.githubusercontent.com/golang/go/release-branch.${2}/VERSION`"
-                 wget -qP  $base_dir/tar  https://dl.google.com/go/${version_rc}.${file_os}-amd64.tar.gz
-                 mv ${base_dir}/tar/${version_rc}.${file_os}-amd64.tar.gz ${base_dir}/tar/${2}.${file_os}-amd64.tar.gz
+                 version_rc=$(curl -sL https://raw.githubusercontent.com/golang/go/release-branch.${version}/VERSION)
+                 version=$version_rc
+                 #wget -qP  $base_dir/tar  https://dl.google.com/go/${version_rc}.${file_os}-amd64.tar.gz
+                 curl -sL https://dl.google.com/go/${version_rc}.${file_os}-amd64.tar.gz > $base_dir/tar/$version.$file_os-amd64.tar.gz
+                 #mv ${base_dir}/tar/${version_rc}.${file_os}-amd64.tar.gz ${base_dir}/tar/${2}.${file_os}-amd64.tar.gz
             fi
         fi
         printf -- "[2/4] 开始解压...\n"
         if [[ ! -d "${base_dir}/${2}" ]] ;then
-            echo "unzip......"
-            tar xzf $base_dir/tar/${2}.${file_os}-amd64.tar.gz -C $base_dir
-            mv "${base_dir}/go" "${base_dir}/${2}"
+            #echo "unzip......"
+            tar -xvzf $base_dir/tar/${version}.${file_os}-amd64.tar.gz  "$base_dir/$version"
+            #mv "${base_dir}/go" "${base_dir}/${2}"
         fi
         printf -- "[3/4] 开始安装...\n"
         if [[ ! $GVM ]]; then
@@ -83,7 +93,7 @@
     fi
 
     if [[ $1 == "remove" || $1 == "uninstall" ]];then
-        printf -- "remove && uninstall\n"
+        #printf -- "remove && uninstall\n"
         if [[ $2 == "gvm" ]];then
             sudo rm -rf /usr/local/bin/gvm && rm -rf ${base_dir} && rm -rf  "${HOME}/.gvmrc"        
         fi
@@ -94,7 +104,7 @@
     fi
     
     if [[ $1 == "use" ||  $1 == "select" && $2 != "" ]];then
-        printf -- "use && select\n"
+        #printf -- "use && select\n"
         if [[ ! -d "${base_dir}/${2}" ]];then
             gvm add $2
         fi
