@@ -54,23 +54,30 @@
             mv "${base_dir}/go" "${base_dir}/${2}"
         fi
         printf -- "[3/4] 开始安装...\n"
+        if [[ ! $GVM ]]; then
+            [[ -s "${HOME}/.gvmrc" ]] &&  echo source "${HOME}/.gvmrc" >> ${HOME}/.zshrc
+            [[ -s "${HOME}/.gvmrc" ]] &&  echo source "${HOME}/.gvmrc" >> ${HOME}/.bashrc
+        fi
         echo export GOROOT="${base_dir}/${2}" > ${HOME}/.gvmrc
         echo export GOTOOLDIR="${base_dir}/${2}/pkg/tool/${file_os}_amd64" >> ${HOME}/.gvmrc
-        echo export GOBIN="${base_dir}/${2}/bin" >> ${HOME}/.gvmrc
         echo export GVM=true >> ${HOME}/.gvmrc
         echo export GVM_VERSION=$2 >> ${HOME}/.gvmrc
         gvm_path="${base_dir}/${2}/bin"
         if [[ -z $GOPATH ]] ;then
             GOPATH="${HOME}/go"
         fi
-        [[ ! -d ${GOPATH}/bin ]] && mkdir -p ${GOPATH}/bin
-        cp ${gvm_path}/go ${GOPATH}/bin/go
-        if [[ -e ${gvm_path}/godoc ]] ;then
-            cp ${gvm_path}/godoc ${GOPATH}/bin/godoc
-        fi
-        if [[ -e ${gvm_path}/gofmt ]] ;then
-            cp ${gvm_path}/gofmt ${GOPATH}/bin/gofmt
-        fi
+        mkdir -p $GOPATH
+        echo export GOBIN="${GOPATH}/bin" >> ${HOME}/.gvmrc
+        echo export PATH='$PATH':'$GOROOT'/bin:'$GOPATH'/bin >> ${HOME}/.gvmrc
+        source ${HOME}/.gvmrc
+        #[[ ! -d ${GOPATH}/bin ]] && mkdir -p ${GOPATH}/bin
+        #cp ${gvm_path}/go ${GOPATH}/bin/go
+        #if [[ -e ${gvm_path}/godoc ]] ;then
+        #    cp ${gvm_path}/godoc ${GOPATH}/bin/godoc
+        #fi
+        #if [[ -e ${gvm_path}/gofmt ]] ;then
+        #    cp ${gvm_path}/gofmt ${GOPATH}/bin/gofmt
+        #fi
         printf -- "[4/4] 安装完成"
         gvm sersion
     fi
@@ -78,7 +85,7 @@
     if [[ $1 == "remove" || $1 == "uninstall" ]];then
         printf -- "remove && uninstall\n"
         if [[ $2 == "gvm" ]];then
-            sudo rm -rf /usr/local/bin && rm -rf ${base_dir} && rm -rf  "${HOME}/.gvmrc"        
+            sudo rm -rf /usr/local/bin/gvm && rm -rf ${base_dir} && rm -rf  "${HOME}/.gvmrc"        
         fi
         if [[ -d "${base_dir}/${2}" ]] ;then
             rm -rf "${base_dir}/${2}"
@@ -93,16 +100,20 @@
         fi
         echo export GOROOT="${base_dir}/${2}" > ${HOME}/.gvmrc
         echo export GOTOOLDIR="${base_dir}/${2}/pkg/tool/linux_amd64" >> ${HOME}/.gvmrc
-        echo export GOBIN="${base_dir}/${2}/bin" >> ${HOME}/.gvmrc
+        #echo export GOBIN="${base_dir}/${2}/bin" >> ${HOME}/.gvmrc
         echo export GVM=true >> ${HOME}/.gvmrc
         echo export GVM_VERSION=$2 >> ${HOME}/.gvmrc
         gvm_path="${base_dir}/${2}/bin"
         if [[ -z $GOPATH ]] ;then
             GOPATH="${HOME}/go"
         fi
-        cp ${gvm_path}/go ${GOPATH}/bin/go
-        cp ${gvm_path}/godoc ${GOPATH}/bin/godoc
-        cp ${gvm_path}/gofmt ${GOPATH}/bin/gofmt
+        mkdir -p $GOPATH
+        echo export GOBIN="${GOPATH}/bin" >> ${HOME}/.gvmrc
+        echo export PATH='$PATH':'$GOROOT'/bin:'$GOPATH'/bin >> ${HOME}/.gvmrc
+        source ${HOME}/.gvmrc
+        #cp ${gvm_path}/go ${GOPATH}/bin/go
+        #cp ${gvm_path}/godoc ${GOPATH}/bin/godoc
+        #cp ${gvm_path}/gofmt ${GOPATH}/bin/gofmt
     fi
 
     if [[ $1 == "version" || $1 == "-v" ]] ; then

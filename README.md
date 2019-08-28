@@ -2,17 +2,11 @@
 go语言版本管理,自用,非侵入.
 
 # 安装
-## mac
-```
-brew install freecracy/gvm
-```
-## ubuntu
+
 ```bash
-#root用户
-curl -sSfo gvm https://raw.githubusercontent.com/freecracy/gvm/master/gvm && mv gvm /usr/local/bin/gvm && chmod +x /usr/local/bin/gvm
-#非root用户
-curl -sSfo gvm https://raw.githubusercontent.com/freecracy/gvm/master/gvm && sudo mv gvm /usr/local/bin/gvm && sudo  chmod +x /usr/local/bin/gvm
+curl https://raw.githubusercontent.com/freecracy/gvm/master/scripts/install | bash
 ```
+
 # 使用
 ```bash
 Use Age:
