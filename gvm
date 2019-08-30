@@ -15,15 +15,15 @@ set -o pipefail
 
     [[ $os == "Darwin" ]] && file_os="darwin"
     
-    [[ ! -d $base_dir ]] && mkdir -p  $base_dir
+    [[ ! -d $base_dir ]] && mkdir -p  "$base_dir"
 
     if [[ $1 == "list" && $2 == "" ]];then
         printf -- "已安装以下版本:\n"
-        for line in $(ls ${base_dir})  ;do
+        for line in $base_dir/* ;do
             if [[ $line == "tar" ]] ; then
                 continue
             fi
-            printf -- $line"\n"
+            printf -- "$line\n"
         done
     fi
 
@@ -31,7 +31,7 @@ set -o pipefail
         printf -- "可选版本:\n"
         version_all=$(curl -sSf https://api.github.com/repos/golang/go/branches |grep name |grep release |awk '{printf $2"\n"}' | cut -c17- |tr -d '",')
         for version in $version_all ;do
-             printf -- $version"\n"
+             printf -- "$version\n"
         done
     fi
 
@@ -41,14 +41,14 @@ set -o pipefail
         if [[ ! -e "${base_dir}/tar/${2}.${file_os}-amd64.tar.gz" ]] ; then
             printf -- "downloading...\n"
             #wget -qP  $base_dir/tar  https://dl.google.com/go/${2}.${file_os}-amd64.tar.gz
-            mkdir -p $base_dir/tar
-            curl -L https://dl.google.com/go/${2}.${file_os}-amd64.tar.gz > "$base_dir/tar/$2.$file_os-amd64.tar.gz"
+            mkdir -p "$base_dir/tar"
+            curl -L "https://dl.google.com/go/${2}.${file_os}-amd64.tar.gz" > "$base_dir/tar/$2.$file_os-amd64.tar.gz"
             #https://raw.githubusercontent.com/golang/go/release-branch.go1.13/VERSION
             if [[ $? != 0 ]] ;then
-                 version_rc=`curl https://raw.githubusercontent.com/golang/go/release-branch.${version}/VERSION`
+                 version_rc=$(curl "https://raw.githubusercontent.com/golang/go/release-branch.${version}/VERSION")
                  version=$version_rc
                  #wget -qP  $base_dir/tar  https://dl.google.com/go/${version_rc}.${file_os}-amd64.tar.gz
-                 curl -sL https://dl.google.com/go/${version_rc}.${file_os}-amd64.tar.gz > $base_dir/tar/$version_rc.$file_os-amd64.tar.gz
+                 curl -sL "https://dl.google.com/go/${version_rc}.${file_os}-amd64.tar.gz" > "$base_dir/tar/$version_rc.$file_os-amd64.tar.gz"
                  #mv ${base_dir}/tar/${version_rc}.${file_os}-amd64.tar.gz ${base_dir}/tar/${2}.${file_os}-amd64.tar.gz
             fi
         fi
@@ -103,8 +103,8 @@ set -o pipefail
         if [[ ! -d "${base_dir}/${2}" ]];then
             gvm add $2
         fi
-        echo export GOROOT="${base_dir}/${2}" > ${HOME}/.gvmrc
-        echo export GOTOOLDIR="${base_dir}/${2}/pkg/tool/linux_amd64" >> ${HOME}/.gvmrc
+        { echo  export GOROOT="${base_dir}/${2}" } > "${HOME}/.gvmrc"
+        { echo export GOTOOLDIR="${base_dir}/${2}/pkg/tool/linux_amd64" } >> ${HOME}/.gvmrc
         #echo export GOBIN="${base_dir}/${2}/bin" >> ${HOME}/.gvmrc
         echo export GVM=true >> ${HOME}/.gvmrc
         echo export GVM_VERSION=$2 >> ${HOME}/.gvmrc
@@ -162,10 +162,10 @@ if [[ ! -d "$base_dir/go1.12.9" ]] ;then
 fi
 
 echo "[3/3]"
-echo export GOROOT="${base_dir}/go1.12.9" > ${HOME}/.gvmrc
-echo export GOTOOLDIR="${GOROOT}/pkg/tool/linux_amd64" >> ${HOME}/.gvmrc
-echo export GOBIN="${base_dir}/bin" >> ${HOME}/.gvmrc
-echo export GVM=true >> ${HOME}/.gvmrc
+echo export GOROOT="${base_dir}/go1.12.9" > "$HOME/.gvmrc"
+ { export GOTOOLDIR="${GOROOT}/pkg/tool/linux_amd64" >> "$HOME/.gvmrc"
+echo export GOBIN="${base_dir}/bin" >> "$HOME/.gvmrc"
+echo export GVM=true >> "$HOME/.gvmrc"
 if [[ ! $GVM ]]; then
-    [[ -s "${HOME}/.gvmrc" ]] &&  echo source "${HOME}/.gvmrc" >> ${HOME}/.zshrc
+    [[ -s "${HOME}/.gvmrc" ]] &&  echo source "${HOME}/.gvmrc" >> "$HOME/.zshrc"
 fi
