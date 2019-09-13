@@ -15,7 +15,7 @@ Use Age:
     gvm add [version]        安装对应版本
     gvm use [version]        选择对应版本
     gvm version              显示当前使用版本
-    gvm remove [version|gvm] 卸载对应版本或卸载gvm
+    gvm rm [version|gvm] 卸载对应版本或卸载gvm
     gvm help                 显示帮助信息
 ```
 
