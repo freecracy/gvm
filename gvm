@@ -62,7 +62,7 @@ set -o pipefail
         if [[ ! $GVM  ]]; then
             [[ -s "${HOME}/.gvmrc" ]] &&  echo source "${HOME}/.gvmrc" >> ${HOME}/.zshrc
             [[ -s "${HOME}/.gvmrc" ]] &&  echo source "${HOME}/.gvmrc" >> ${HOME}/.bashrc
-            source $HOME/.zshrc
+            #source $HOME/.zshrc
             source $HOME/.bashrc
         fi
         echo export GOROOT="${base_dir}/${2}" > ${HOME}/.gvmrc
