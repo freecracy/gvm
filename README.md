@@ -4,7 +4,7 @@ go语言版本管理,自用,非侵入.
 # 安装
 
 ```bash
-curl https://raw.githubusercontent.com/freecracy/gvm/master/scripts/install | bash
+curl https://raw.githubusercontent.com/freecracy/gvm/master/scripts/install | sh
 ```
 
 # 使用
