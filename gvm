@@ -60,10 +60,10 @@ set -o pipefail
         fi
         printf -- "[3/4] 开始安装...\n"
         if [[ ! $GVM  ]]; then
-            [[ -s "${HOME}/.gvmrc" ]] &&  echo source "${HOME}/.gvmrc" >> ${HOME}/.zshrc
-            [[ -s "${HOME}/.gvmrc" ]] &&  echo source "${HOME}/.gvmrc" >> ${HOME}/.bashrc
+            [[ -s "${HOME}/.zshrc" ]] &&  echo source "${HOME}/.gvmrc" >> ${HOME}/.zshrc
+            [[ -s "${HOME}/.bashrc" ]] &&  echo source "${HOME}/.gvmrc" >> ${HOME}/.bashrc
             #source $HOME/.zshrc
-            source $HOME/.bashrc
+            #source $HOME/.bashrc
         fi
         echo export GOROOT="${base_dir}/${2}" > ${HOME}/.gvmrc
         echo export GOTOOLDIR="${base_dir}/${2}/pkg/tool/${file_os}_amd64" >> ${HOME}/.gvmrc
@@ -75,7 +75,7 @@ set -o pipefail
         fi
         mkdir -p $GOPATH
         echo export GOBIN="${GOPATH}/bin" >> ${HOME}/.gvmrc
-        echo export PATH='$GOROOT'/bin:'$GOPATH'/bin:'$PATH' >> ${HOME}/.gvmrc
+        echo export PATH='$GOROOT'/bin:'$GOBIN':'$PATH' >> ${HOME}/.gvmrc
         source ${HOME}/.gvmrc
         printf -- "[4/4] 安装完成"
         gvm sersion
