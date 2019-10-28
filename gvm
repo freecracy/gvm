@@ -105,7 +105,7 @@ set -o pipefail
         echo export GVM_VERSION=$2 >> ${HOME}/.gvmrc
         gvm_path="${base_dir}/${2}/bin"
         if [[ -z $GOPATH ]] ;then
-            GOPATH="${HOME}/go"
+            GOPATH="${HOME}/.go"
         fi
         mkdir -p $GOPATH
         echo export GOBIN="${GOPATH}/bin" >> ${HOME}/.gvmrc
