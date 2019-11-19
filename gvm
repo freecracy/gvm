@@ -3,18 +3,18 @@
 # 获取版本信息
 #curl -sSf https://api.github.com/repos/golang/go/branches |grep name |grep release |awk '{printf $2"\n"}' | cut -c17- |tr -d '",'
 # 下载相应版本go1.12.9.linux-amd64.tar.gz
-set -e 
-#set -u 
+set -e
+#set -u
 set -o pipefail
 {
 
     base=".gvm"
     base_dir="${HOME}/${base}"
     os=$(uname -s)
-    file_os="linux" 
+    file_os="linux"
 
     [[ $os == "Darwin" ]] && file_os="darwin"
-    
+
     [[ ! -d $base_dir ]] && mkdir -p  "$base_dir"
 
     if [[ $1 == "list" ]];then
@@ -71,7 +71,7 @@ set -o pipefail
         echo export GVM_VERSION=$2 >> ${HOME}/.gvmrc
         gvm_path="${base_dir}/${2}/bin"
         if [[ -z $GOPATH ]] ;then
-            GOPATH="${HOME}/go"
+            GOPATH="${HOME}/.go"
         fi
         mkdir -p $GOPATH
         echo export GOBIN="${GOPATH}/bin" >> ${HOME}/.gvmrc
@@ -84,14 +84,14 @@ set -o pipefail
     if [[ $1 == "remove" || $1 == "uninstall" || $1 == "rm" ]];then
         #printf -- "remove && uninstall\n"
         if [[ $2 == "gvm" ]];then
-            sudo rm -rf /usr/local/bin/gvm && rm -rf ${base_dir} && rm -rf  "${HOME}/.gvmrc"        
+            sudo rm -rf /usr/local/bin/gvm && rm -rf ${base_dir} && rm -rf  "${HOME}/.gvmrc"
         fi
         if [[ -d "${base_dir}/${2}" ]] ;then
             rm -rf "${base_dir}/${2}"
             [[ -f ${GOPATH}/bin/go ]] && rm -rf ${GOPATH}/bin/go
         fi
     fi
-    
+
     if [[ $1 == "use" ||  $1 == "select" && $2 != "" ]] ;then
 
         if [[ ! -d "${base_dir}/${2}" ]];then
