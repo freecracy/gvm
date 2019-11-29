@@ -4,27 +4,27 @@ set -o pipefail
 
 {
 
-	BASE_PATH=$HOME/.gvm
-	GOPATH=$HOME/.go
+    BASE_PATH=$HOME/.gvm
+    GOPATH=$HOME/.go
     GOBIN=$GOPATH/bin
-	GVMRC=$HOME/.gvmrc
-	VERSION_REPO=https://github.com/golang/dl.git
+    GVMRC=$HOME/.gvmrc
+    VERSION_REPO=https://github.com/golang/dl.git
     BASE_DOWNLOAD_URL=https://dl.google.com/go/
-	TARPATH=$BASE_PATH/tar
-	GOHOSTOS=linux
-	VERSION=
+    TARPATH=$BASE_PATH/tar
+    GOHOSTOS=linux
+    VERSION=
 
-	[[ ! -d $BASE_PATH ]] && mkdir -p $BASE_PATH
-	[[ ! -d $TARPATH ]] && mkdir -p $TARPATH
-	[[ ! -d $GOPATH ]] && mkdir -p $GOPATH
-	[[ ! -e $GVMRC ]] && touch $GVMRC
-	[[ $(uname -s) == "Darwin" ]] && GOHOSTOS="darwin"
+    [[ ! -d $BASE_PATH ]] && mkdir -p $BASE_PATH
+    [[ ! -d $TARPATH ]] && mkdir -p $TARPATH
+    [[ ! -d $GOPATH ]] && mkdir -p $GOPATH
+    [[ ! -e $GVMRC ]] && touch $GVMRC
+    [[ $(uname -s) == "Darwin" ]] && GOHOSTOS="darwin"
 
-	if [[ ! -d $BASE_PATH/dl ]]; then
-		git clone $VERSION_REPO $BASE_PATH/dl > /dev/null 2>&1 || { printf -- "	安装git后重试\n" ; exit;}
-	fi
+    if [[ ! -d $BASE_PATH/dl ]]; then
+        git clone $VERSION_REPO $BASE_PATH/dl > /dev/null 2>&1 || { printf -- " 安装git后重试\n" ; exit;}
+    fi
 
-	if [[ $1 == "help" || $1 == "-h" || $1 = "" ]] ; then
+    if [[ $1 == "help" || $1 == "-h" || $1 = "" ]] ; then
         printf -- "Use Age:\n"
         printf -- "    gvm list \v 列出已安装版本\n"
         printf -- "    gvm list all \v 列出用版本\n"
@@ -36,19 +36,19 @@ set -o pipefail
     fi
 
     if [[  $1 == "list" && $2 == "" ]];then
-    	printf -- "已安装以下版本:\n"
+        printf -- "已安装以下版本:\n"
 
     fi
 
     if [[ $1 ==  "list" && $2 == "all" ]];then
-    	printf -- "可选版本:\n"
+        printf -- "可选版本:\n"
 
-    	versionlist=
-    	for version in $(ls $BASE_PATH/dl | grep -E "go[0-9]?\.[0-9]{1,2}" | grep -v 'beta' |grep -v 'rc');do
-    		versionlist+=$version" "
-    	done
+        versionlist=
+        for version in $(ls $BASE_PATH/dl | grep -E "go[0-9]?\.[0-9]{1,2}" | grep -v 'beta' |grep -v 'rc');do
+            versionlist+=$version" "
+        done
 
-    	printf -- "%s " $versionlist
+        printf -- "%s " $versionlist
         printf -- "\n"
     fi
 
@@ -69,7 +69,7 @@ set -o pipefail
     }
 
     if [[ $1 == "add" || $1 == "install" && $2 != "" ]];then
-    	printf -- "[1/4] 开始下载...\n"
+        printf -- "[1/4] 开始下载...\n"
 
         VERSION=$2
         downloadfilename=$VERSION.$GOHOSTOS-amd64.tar.gz
@@ -87,27 +87,27 @@ set -o pipefail
             fi
         fi
 
-    	printf -- "[2/4] 开始解压...\n"
+        printf -- "[2/4] 开始解压...\n"
 
         if [[ ! -d $BASE_PATH/$VERSION ]] ;then
             tar -xvzf $BASE_PATH/tar/$VERSION.$GOHOSTOS-amd64.tar.gz -C $BASE_PATH
             mv $BASE_PATH/go $BASE_PATH/$VERSION
         fi
 
-    	printf -- "[3/4] 开始安装...\n"
+        printf -- "[3/4] 开始安装...\n"
             if [[ ! $GVM  ]]; then
                 setinit="source $GVMRC"
                 [[ -e $HOME/.zshrc ]] &&  echo $setinit >> $HOME/.zshrc && source $HOME/.zshrc
                 [[ -e $HOME/.bashrc ]] &&  echo $setinit >> $HOME/.bashrc && source $HOME/.bashrc
             fi
             setenv $VERSION
-    	printf -- "[4/4] 安装完成\n"
+        printf -- "[4/4] 安装完成\n"
         source $GVMRC
-    	gvm sersion
+        gvm sersion
     fi
 
     if [[ $1 == "remove" || $1 == "uninstall" || $1 == "rm" && $2 != "" ]];then
-    	printf -- "卸载$2\n"
+        printf -- "卸载$2\n"
         if [[ $2 == "gvm" ]];then
             sudo rm -rf /usr/local/bin/gvm && rm -rf $BASE_PATH && rm -rf  $GVMRC
         fi
@@ -119,7 +119,7 @@ set -o pipefail
 
     if [[ $1 == "use" ||  $1 == "select" && $2 != "" ]];then
         VERSION=$2
-    	printf -- "选择版本$VERSION\n"
+        printf -- "选择版本$VERSION\n"
         setenv $VERSION
         source $GVMRC
     fi
