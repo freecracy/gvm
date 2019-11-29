@@ -4,10 +4,10 @@ set -o pipefail
 
 {
 
-	BASE_PATH=$HOME/.gvm2
-	GOPATH=$HOME/.go2
+	BASE_PATH=$HOME/.gvm
+	GOPATH=$HOME/.go
     GOBIN=$GOPATH/bin
-	GVMRC=$HOME/.gmv2rc
+	GVMRC=$HOME/.gvmrc
 	VERSION_REPO=https://github.com/golang/dl.git
     BASE_DOWNLOAD_URL=https://dl.google.com/go/
 	TARPATH=$BASE_PATH/tar
@@ -49,6 +49,7 @@ set -o pipefail
     	done
 
     	printf -- "%s " $versionlist
+        printf -- "\n"
     fi
 
     function setenv(){
@@ -58,11 +59,11 @@ set -o pipefail
         GOROOT=$BASE_PATH/$VERSION
         GOPATH=$GOPATH
         GOBIN=$GOPATH/bin
-        gvmrc="export GVM=true\n"
-        gvmrc+="export GVMVERSION=$GVMVERSION\n"
-        gvmrc+="export GOROOT=$GOROOT\n"
-        gvmrc+="export GOPATH=$GOPATH\n"
-        gvmrc+="export PATH=$GOBIN:$GOROOT/bin:$PATH"
+        gvmrc="export GVM=true;"
+        gvmrc+="export GVMVERSION=$GVMVERSION;"
+        gvmrc+="export GOROOT=$GOROOT;"
+        gvmrc+="export GOPATH=$GOPATH;"
+        gvmrc+="export PATH=$GOBIN:$GOROOT/bin:$PATH;"
         echo $gvmrc > $GVMRC
         source $GVMRC
     }
@@ -97,18 +98,18 @@ set -o pipefail
             setenv $VERSION
             if [[ ! $GVM  ]]; then
                 setinit="source $GVMRC"
-                [[ -e $HOME/.zshrc ]] &&  echo source $setinit >> $HOME/.zshrc && source $HOME/.zshrc
-                [[ -e $HOME/.bashrc ]] &&  echo source $setinit >> $HOME/.bashrc && source $HOME/.bashrc
+                [[ -e $HOME/.zshrc ]] &&  echo $setinit >> $HOME/.zshrc && source $HOME/.zshrc
+                [[ -e $HOME/.bashrc ]] &&  echo $setinit >> $HOME/.bashrc && source $HOME/.bashrc
             fi
-    	printf -- "[4/4] 安装完成"
-
+    	printf -- "[4/4] 安装完成\n"
+        source $GVMRC
     	gvm sersion
     fi
 
     if [[ $1 == "remove" || $1 == "uninstall" || $1 == "rm" && $2 != "" ]];then
     	printf -- "卸载$2\n"
         if [[ $2 == "gvm" ]];then
-            sudo rm -rf /usr/local/bin/gvm && rm -rf $BASE_PATH && rm -rf  $HOME/.gvmrc
+            sudo rm -rf /usr/local/bin/gvm && rm -rf $BASE_PATH && rm -rf  $GVMRC
         fi
         if [[ -d $BASE_PATH/$2 ]] ;then
             rm -rf $BASE_PATH/$2
@@ -120,6 +121,7 @@ set -o pipefail
         VERSION=$2
     	printf -- "选择版本$VERSION\n"
         setenv $VERSION
+        source $GVMRC
     fi
 
     if [[ $1 == "version" || $1 == "-v" ]] ; then
@@ -127,11 +129,5 @@ set -o pipefail
             go version
         fi
     fi
-
-	printf -- "安装成功\n"
-
 }
-
-
-
 
