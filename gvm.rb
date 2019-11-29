@@ -5,6 +5,7 @@ class Gvm < Formula
   desc "gvm"
   homepage "https://github.com/freecracy/gvm"
   url "https://raw.githubusercontent.com/freecracy/gvm/master/gvm"
+  version "v2.0"
   # sha256 "69d29344184dbb38c45a820823fee7c1f316100d7d7ba15f99df0a02f89b9efe"
   # depends_on "cmake" => :build
 
