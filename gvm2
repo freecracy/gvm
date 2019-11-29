@@ -6,6 +6,7 @@ set -o pipefail
 
 	BASE_PATH=$HOME/.gvm2
 	GOPATH=$HOME/.go2
+    GOBIN=$GOPATH/bin
 	GVMRC=$HOME/.gmv2rc
 	VERSION_REPO=https://github.com/golang/dl.git
     BASE_DOWNLOAD_URL=https://dl.google.com/go/
@@ -50,6 +51,22 @@ set -o pipefail
     	printf -- "%s " $versionlist
     fi
 
+    function setenv(){
+        VERSION=$1
+        GVM=true
+        GVMVERSION=$VERSION
+        GOROOT=$BASE_PATH/$VERSION
+        GOPATH=$GOPATH
+        GOBIN=$GOPATH/bin
+        gvmrc="export GVM=true\n"
+        gvmrc+="export GVMVERSION=$GVMVERSION\n"
+        gvmrc+="export GOROOT=$GOROOT\n"
+        gvmrc+="export GOPATH=$GOPATH\n"
+        gvmrc+="export PATH=$GOBIN:$GOROOT/bin:$PATH"
+        echo $gvmrc > $GVMRC
+        source $GVMRC
+    }
+
     if [[ $1 == "add" || $1 == "install" && $2 != "" ]];then
     	printf -- "[1/4] 开始下载...\n"
 
@@ -77,18 +94,32 @@ set -o pipefail
         fi
 
     	printf -- "[3/4] 开始安装...\n"
-
+            setenv $VERSION
+            if [[ ! $GVM  ]]; then
+                setinit="source $GVMRC"
+                [[ -e $HOME/.zshrc ]] &&  echo source $setinit >> $HOME/.zshrc && source $HOME/.zshrc
+                [[ -e $HOME/.bashrc ]] &&  echo source $setinit >> $HOME/.bashrc && source $HOME/.bashrc
+            fi
     	printf -- "[4/4] 安装完成"
 
     	gvm sersion
     fi
 
     if [[ $1 == "remove" || $1 == "uninstall" || $1 == "rm" && $2 != "" ]];then
-    	printf -- "卸载$\n"
+    	printf -- "卸载$2\n"
+        if [[ $2 == "gvm" ]];then
+            sudo rm -rf /usr/local/bin/gvm && rm -rf $BASE_PATH && rm -rf  $HOME/.gvmrc
+        fi
+        if [[ -d $BASE_PATH/$2 ]] ;then
+            rm -rf $BASE_PATH/$2
+            [[ -f $GOPATH/bin/go ]] && rm -rf $GOPATH/bin/go
+        fi
     fi
 
     if [[ $1 == "use" ||  $1 == "select" && $2 != "" ]];then
-    	printf -- "选择版本\n"
+        VERSION=$2
+    	printf -- "选择版本$VERSION\n"
+        setenv $VERSION
     fi
 
     if [[ $1 == "version" || $1 == "-v" ]] ; then
