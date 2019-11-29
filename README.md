@@ -17,16 +17,25 @@ brew install freecracy/gvm/gvm
 # 使用
 ```bash
 Use Age:
-    gvm list                 列出已安装版本
-    gvm listall              列出用版本
-    gvm add [version]        安装对应版本
-    gvm use [version]        选择对应版本
-    gvm version              显示当前使用版本
-    gvm rm [version|gvm] 卸载对应版本或卸载gvm
-    gvm help                 显示帮助信息
+    gvm list
+              列出已安装版本
+    gvm list all
+                  列出用版本
+    gvm [add|install] [version]
+                                 安装对应版本
+    gvm [use|select] [version]
+                                选择对应版本
+    gvm version
+                 显示当前使用版本
+    gvm [rm|remove|uninstall] [version|gvm]
+                                             卸载对应版本或卸载gvm
+    gvm [help|-h]
+                   显示帮助信息
 ```
 
 # 卸载
 ```bash
 gvm remove gvm
 ```
+
+
