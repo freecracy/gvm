@@ -11,6 +11,7 @@ curl https://raw.githubusercontent.com/freecracy/gvm/master/scripts/install | sh
 ## brew 安装
 ```sh
 brew tap freecracy/gvm http://github.com/freecracy/gvm
+brew install freecracy/gvm/gvm
 ```
 
 # 使用
