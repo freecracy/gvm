@@ -7,6 +7,10 @@ go语言版本管理,自用,非侵入.
 curl https://raw.githubusercontent.com/freecracy/gvm/master/scripts/install | sh
 ```
 
+```sh
+brew tap freecracy/gvm http://github.com/freecracy/gvm
+```
+
 # 使用
 ```bash
 Use Age:
