@@ -21,7 +21,7 @@ set -o pipefail
 	[[ $(uname -s) == "Darwin" ]] && GOHOSTOS="darwin"
 
 	if [[ ! -d $BASE_PATH/dl ]]; then
-		git clone $VERSION_REPO $BASE_PATH/dl || { printf -- "	安装git后重试\n" ; exit;}
+		git clone $VERSION_REPO $BASE_PATH/dl > /dev/null 2>&1 || { printf -- "	安装git后重试\n" ; exit;}
 	fi
 
 	if [[ $1 == "help" || $1 == "-h" || $1 = "" ]] ; then
