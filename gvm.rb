@@ -16,8 +16,8 @@ class Watermark < Formula
                           # "--disable-silent-rules",
                           # "--prefix=#{prefix}"
     # system "cmake", ".", *std_cmake_args
-    mv gvm "#{bin}/gvm" 
-    #bin.install "gvm"
+
+    bin.install "gvm"
     # system "make", "install" # if this fails, try separate make/make install steps
   end
 

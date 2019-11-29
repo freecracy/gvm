@@ -1,116 +1,127 @@
-#!/bin/env bash
-#https://api.github.com/repos/golang/go/branches
-# 获取版本信息
-#curl -sSf https://api.github.com/repos/golang/go/branches |grep name |grep release |awk '{printf $2"\n"}' | cut -c17- |tr -d '",'
-# 下载相应版本go1.12.9.linux-amd64.tar.gz
+#!/bin/bash
 set -e
-#set -u
 set -o pipefail
+
 {
 
-    base=".gvm"
-    base_dir="${HOME}/${base}"
-    os=$(uname -s)
-    file_os="linux"
+	BASE_PATH=$HOME/.gvm
+	GOPATH=$HOME/.go
+    GOBIN=$GOPATH/bin
+	GVMRC=$HOME/.gvmrc
+	VERSION_REPO=https://github.com/golang/dl.git
+    BASE_DOWNLOAD_URL=https://dl.google.com/go/
+	TARPATH=$BASE_PATH/tar
+	GOHOSTOS=linux
+	VERSION=
 
-    [[ $os == "Darwin" ]] && file_os="darwin"
+	[[ ! -d $BASE_PATH ]] && mkdir -p $BASE_PATH
+	[[ ! -d $TARPATH ]] && mkdir -p $TARPATH
+	[[ ! -d $GOPATH ]] && mkdir -p $GOPATH
+	[[ ! -e $GVMRC ]] && touch $GVMRC
+	[[ $(uname -s) == "Darwin" ]] && GOHOSTOS="darwin"
 
-    [[ ! -d $base_dir ]] && mkdir -p  "$base_dir"
+	if [[ ! -d $BASE_PATH/dl ]]; then
+		git clone $VERSION_REPO $BASE_PATH/dl > /dev/null 2>&1 || { printf -- "	安装git后重试\n" ; exit;}
+	fi
 
-    if [[ $1 == "list" ]];then
-        printf -- "已安装以下版本:\n"
-        for line in $(ls $base_dir) ;do
-            if [[ $line == "tar" ]] ; then
-                continue
-            fi
-            printf -- "$line\n"
-        done
+	if [[ $1 == "help" || $1 == "-h" || $1 = "" ]] ; then
+        printf -- "Use Age:\n"
+        printf -- "    gvm list \v 列出已安装版本\n"
+        printf -- "    gvm list all \v 列出用版本\n"
+        printf -- "    gvm [add|install] [version] \v 安装对应版本\n"
+        printf -- "    gvm [use|select] [version] \v 选择对应版本\n"
+        printf -- "    gvm version \v 显示当前使用版本\n"
+        printf -- "    gvm [rm|remove|uninstall] [version|gvm] \v 卸载对应版本或卸载gvm\n"
+        printf -- "    gvm [help|-h] \v 显示帮助信息\n"
     fi
 
-    if [[ $1 ==  "listall" ]];then
-        printf -- "可选版本:\n"
-        version_all=$(curl -sSf https://api.github.com/repos/golang/go/branches |grep name |grep release |awk '{printf $2"\n"}' | cut -c17- |tr -d '",')
-        for version in $version_all ;do
-             printf -- "$version\n"
-        done
+    if [[  $1 == "list" && $2 == "" ]];then
+    	printf -- "已安装以下版本:\n"
+
     fi
+
+    if [[ $1 ==  "list" && $2 == "all" ]];then
+    	printf -- "可选版本:\n"
+
+    	versionlist=
+    	for version in $(ls $BASE_PATH/dl | grep -E "go[0-9]?\.[0-9]{1,2}" | grep -v 'beta' |grep -v 'rc');do
+    		versionlist+=$version" "
+    	done
+
+    	printf -- "%s " $versionlist
+        printf -- "\n"
+    fi
+
+    function setenv(){
+        VERSION=$1
+        GVM=true
+        GVMVERSION=$VERSION
+        GOROOT=$BASE_PATH/$VERSION
+        GOPATH=$GOPATH
+        GOBIN=$GOPATH/bin
+        gvmrc="export GVM=true;"
+        gvmrc+="export GVMVERSION=$GVMVERSION;"
+        gvmrc+="export GOROOT=$GOROOT;"
+        gvmrc+="export GOPATH=$GOPATH;"
+        gvmrc+="export PATH=$GOBIN:$GOROOT/bin:$PATH;"
+        echo $gvmrc > $GVMRC
+        source $GVMRC
+    }
 
     if [[ $1 == "add" || $1 == "install" && $2 != "" ]];then
-        printf -- "[1/4] 开始下载...\n"
-        version=$2
-        if [[ ! -e "${base_dir}/tar/${2}.${file_os}-amd64.tar.gz" ]] ; then
-            printf -- "downloading...\n"
-            #wget -qP  $base_dir/tar  https://dl.google.com/go/${2}.${file_os}-amd64.tar.gz
-            mkdir -p "$base_dir/tar"
-            curl -L "https://dl.google.com/go/${2}.${file_os}-amd64.tar.gz" > "$base_dir/tar/$2.$file_os-amd64.tar.gz"
-            #https://raw.githubusercontent.com/golang/go/release-branch.go1.13/VERSION
-            if [[ $? != 0 ]] ;then
-                 version_rc=$(curl "https://raw.githubusercontent.com/golang/go/release-branch.${version}/VERSION")
-                 version=$version_rc
-                 #wget -qP  $base_dir/tar  https://dl.google.com/go/${version_rc}.${file_os}-amd64.tar.gz
-                 curl -sL "https://dl.google.com/go/${version_rc}.${file_os}-amd64.tar.gz" > "$base_dir/tar/$version_rc.$file_os-amd64.tar.gz"
-                 #mv ${base_dir}/tar/${version_rc}.${file_os}-amd64.tar.gz ${base_dir}/tar/${2}.${file_os}-amd64.tar.gz
+    	printf -- "[1/4] 开始下载...\n"
+
+        VERSION=$2
+        downloadfilename=$VERSION.$GOHOSTOS-amd64.tar.gz
+        downloadfile=$BASE_PATH/tar/$downloadfilename
+        downloadurl=$BASE_DOWNLOAD_URL$downloadfilename
+
+        if [[ ! -e $downloadfile ]] ; then
+            if command -v curl > /dev/null ;then
+                curl -L $BASE_DOWNLOAD_URL$VERSION.$GOHOSTOS-amd64.tar.gz > $BASE_PATH/tar/$VERSION.$GOHOSTOS-amd64.tar.gz
+            elif command -v wget > /dev/null ;then
+                wget -P $BASE_PATH/tar $BASE_DOWNLOAD_URL$VERSION.$GOHOSTOS-amd64.tar.gz
+            else
+                printf -- "\t安装wget后重试...\n"
+                exit
             fi
         fi
-        printf -- "[2/4] 开始解压...\n"
-        if [[ ! -d "${base_dir}/${2}" ]] ;then
-            printf -- "unzip......\n"
-            tar -xvzf "$base_dir/tar/${version}.${file_os}-amd64.tar.gz" -C "$base_dir"
-            mv "${base_dir}/go" "${base_dir}/${2}"
+
+    	printf -- "[2/4] 开始解压...\n"
+
+        if [[ ! -d $BASE_PATH/$VERSION ]] ;then
+            tar -xvzf $BASE_PATH/tar/$VERSION.$GOHOSTOS-amd64.tar.gz -C $BASE_PATH
+            mv $BASE_PATH/go $BASE_PATH/$VERSION
         fi
-        printf -- "[3/4] 开始安装...\n"
-        if [[ ! $GVM  ]]; then
-            [[ -s "${HOME}/.zshrc" ]] &&  echo source "${HOME}/.gvmrc" >> ${HOME}/.zshrc
-            [[ -s "${HOME}/.bashrc" ]] &&  echo source "${HOME}/.gvmrc" >> ${HOME}/.bashrc
-            #source $HOME/.zshrc
-            #source $HOME/.bashrc
-        fi
-        echo export GOROOT="${base_dir}/${2}" > ${HOME}/.gvmrc
-        echo export GOTOOLDIR="${base_dir}/${2}/pkg/tool/${file_os}_amd64" >> ${HOME}/.gvmrc
-        echo export GVM=true >> ${HOME}/.gvmrc
-        echo export GVM_VERSION=$2 >> ${HOME}/.gvmrc
-        gvm_path="${base_dir}/${2}/bin"
-        if [[ -z $GOPATH ]] ;then
-            GOPATH="${HOME}/.go"
-        fi
-        mkdir -p $GOPATH
-        echo export GOBIN="${GOPATH}/bin" >> ${HOME}/.gvmrc
-        echo export PATH='$GOROOT'/bin:'$GOBIN':'$PATH' >> ${HOME}/.gvmrc
-        source ${HOME}/.gvmrc
-        printf -- "[4/4] 安装完成"
-        gvm sersion
+
+    	printf -- "[3/4] 开始安装...\n"
+            setenv $VERSION
+            if [[ ! $GVM  ]]; then
+                setinit="source $GVMRC"
+                [[ -e $HOME/.zshrc ]] &&  echo $setinit >> $HOME/.zshrc && source $HOME/.zshrc
+                [[ -e $HOME/.bashrc ]] &&  echo $setinit >> $HOME/.bashrc && source $HOME/.bashrc
+            fi
+    	printf -- "[4/4] 安装完成\n"
+        source $GVMRC
+    	gvm sersion
     fi
 
-    if [[ $1 == "remove" || $1 == "uninstall" || $1 == "rm" ]];then
-        #printf -- "remove && uninstall\n"
+    if [[ $1 == "remove" || $1 == "uninstall" || $1 == "rm" && $2 != "" ]];then
+    	printf -- "卸载$2\n"
         if [[ $2 == "gvm" ]];then
-            sudo rm -rf /usr/local/bin/gvm && rm -rf ${base_dir} && rm -rf  "${HOME}/.gvmrc"
+            sudo rm -rf /usr/local/bin/gvm && rm -rf $BASE_PATH && rm -rf  $GVMRC
         fi
-        if [[ -d "${base_dir}/${2}" ]] ;then
-            rm -rf "${base_dir}/${2}"
-            [[ -f ${GOPATH}/bin/go ]] && rm -rf ${GOPATH}/bin/go
+        if [[ -d $BASE_PATH/$2 ]] ;then
+            rm -rf $BASE_PATH/$2
+            [[ -f $GOPATH/bin/go ]] && rm -rf $GOPATH/bin/go
         fi
     fi
 
-    if [[ $1 == "use" ||  $1 == "select" && $2 != "" ]] ;then
-
-        if [[ ! -d "${base_dir}/${2}" ]];then
-            gvm add $2
-        fi
-
-        echo  export GOROOT="${base_dir}/${2}" } > "${HOME}/.gvmrc"
-        echo export GOTOOLDIR="${base_dir}/${2}/pkg/tool/linux_amd64" } >> ${HOME}/.gvmrc
-        #echo export GOBIN="${base_dir}/${2}/bin" >> ${HOME}/.gvmrc
-        echo export GVM=true >> ${HOME}/.gvmrc
-        echo export GVM_VERSION=$2 >> ${HOME}/.gvmrc
-        gvm_path="${base_dir}/${2}/bin"
-        if [[ -z $GOPATH ]] ;then
-            GOPATH="${HOME}/.go"
-        fi
-        mkdir -p $GOPATH
-        echo export GOBIN="${GOPATH}/bin" >> ${HOME}/.gvmrc
-        echo export PATH='$GOROOT'/bin:'$GOPATH'/bin:'$PATH' >> ${HOME}/.gvmrc
-        source ${HOME}/.gvmrc
+    if [[ $1 == "use" ||  $1 == "select" && $2 != "" ]];then
+        VERSION=$2
+    	printf -- "选择版本$VERSION\n"
+        setenv $VERSION
+        source $GVMRC
     fi
 
     if [[ $1 == "version" || $1 == "-v" ]] ; then
@@ -118,46 +129,5 @@ set -o pipefail
             go version
         fi
     fi
-
-    if [[ $1 == "help" || $1 == "-h" || $1 = "" ]] ; then
-        printf -- "Use Age:\n"
-        printf -- "    gvm list                 列出已安装版本\n"
-        printf -- "    gvm listall              列出用版本\n"
-        printf -- "    gvm add [version]        安装对应版本\n"
-        printf -- "    gvm use [version]        选择对应版本\n"
-        printf -- "    gvm version              显示当前使用版本\n"
-        printf -- "    gvm rm  [version|gvm] 卸载对应版本或卸载gvm\n"
-        printf -- "    gvm help                 显示帮助信息\n"
-    fi
-
 }
-exit 0
 
-
-base_dir=$HOME"/.gvm"
-
-if [[ ! -d $base_dir ]] ; then
-    mkdir -p  $base_dir
-fi
-
-echo "[1/3]"
-if [[ ! -e "${base_dir}/tar/go1.12.9.linux-amd64.tar.gz" ]] ; then
-    echo "downloading..."
-    wget -qP  $base_dir/tar  https://dl.google.com/go/go1.12.9.linux-amd64.tar.gz
-fi
-
-echo "[2/3]"
-if [[ ! -d "$base_dir/go1.12.9" ]] ;then
-    echo "downloading......"
-    tar xzf $base_dir/tar/go1.12.9.linux-amd64.tar.gz -C $base_dir
-    mv $base_dir/go $base_dir/go1.12.9
-fi
-
-echo "[3/3]"
-echo export GOROOT="${base_dir}/go1.12.9" > "$HOME/.gvmrc"
- { export GOTOOLDIR="${GOROOT}/pkg/tool/linux_amd64" >> "$HOME/.gvmrc"
-echo export GOBIN="${base_dir}/bin" >> "$HOME/.gvmrc"
-echo export GVM=true >> "$HOME/.gvmrc"
-if [[ ! $GVM ]]; then
-    [[ -s "${HOME}/.gvmrc" ]] &&  echo source "${HOME}/.gvmrc" >> "$HOME/.zshrc"
-fi

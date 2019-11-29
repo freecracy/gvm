@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-curl -L https://raw.githubusercontent.com/freecracy/gvm/master/gvm2 > gvm
+curl -L https://raw.githubusercontent.com/freecracy/gvm/master/gvm > gvm
 mv gvm /usr/local/bin/gvm || sudo mv gvm /usr/local/bin/gvm
 chmod +x /usr/local/bin/gvm || sudo chmod +x /usr/local/bin/gvm
 cat <<-'EOF'
