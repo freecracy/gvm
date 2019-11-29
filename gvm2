@@ -1,0 +1,106 @@
+#!/bin/bash
+set -e
+set -o pipefail
+
+{
+
+	BASE_PATH=$HOME/.gvm2
+	GOPATH=$HOME/.go2
+	GVMRC=$HOME/.gmv2rc
+	VERSION_REPO=https://github.com/golang/dl.git
+    BASE_DOWNLOAD_URL=https://dl.google.com/go/
+	TARPATH=$BASE_PATH/tar
+	GOHOSTOS=linux
+	VERSION=
+
+	[[ ! -d $BASE_PATH ]] && mkdir -p $BASE_PATH
+	[[ ! -d $TARPATH ]] && mkdir -p $TARPATH
+	[[ ! -d $GOPATH ]] && mkdir -p $GOPATH
+	[[ ! -e $GVMRC ]] && touch $GVMRC
+	[[ $(uname -s) == "Darwin" ]] && GOHOSTOS="darwin"
+
+	if [[ ! -d $BASE_PATH/dl ]]; then
+		git clone $VERSION_REPO $BASE_PATH/dl || { printf -- "	安装git后重试\n" ; exit;}
+	fi
+
+	if [[ $1 == "help" || $1 == "-h" || $1 = "" ]] ; then
+        printf -- "Use Age:\n"
+        printf -- "    gvm list \v 列出已安装版本\n"
+        printf -- "    gvm list all \v 列出用版本\n"
+        printf -- "    gvm [add|install] [version] \v 安装对应版本\n"
+        printf -- "    gvm [use|select] [version] \v 选择对应版本\n"
+        printf -- "    gvm version \v 显示当前使用版本\n"
+        printf -- "    gvm [rm|remove|uninstall] [version|gvm] \v 卸载对应版本或卸载gvm\n"
+        printf -- "    gvm [help|-h] \v 显示帮助信息\n"
+    fi
+
+    if [[  $1 == "list" && $2 == "" ]];then
+    	printf -- "已安装以下版本:\n"
+
+    fi
+
+    if [[ $1 ==  "list" && $2 == "all" ]];then
+    	printf -- "可选版本:\n"
+
+    	versionlist=
+    	for version in $(ls $BASE_PATH/dl | grep -E "go[0-9]?\.[0-9]{1,2}" | grep -v 'beta' |grep -v 'rc');do
+    		versionlist+=$version" "
+    	done
+
+    	printf -- "%s " $versionlist
+    fi
+
+    if [[ $1 == "add" || $1 == "install" && $2 != "" ]];then
+    	printf -- "[1/4] 开始下载...\n"
+
+        VERSION=$2
+        downloadfilename=$VERSION.$GOHOSTOS-amd64.tar.gz
+        downloadfile=$BASE_PATH/tar/$downloadfilename
+        downloadurl=$BASE_DOWNLOAD_URL$downloadfilename
+
+        if [[ ! -e $downloadfile ]] ; then
+            if command -v curl > /dev/null ;then
+                curl -L $BASE_DOWNLOAD_URL$VERSION.$GOHOSTOS-amd64.tar.gz > $BASE_PATH/tar/$VERSION.$GOHOSTOS-amd64.tar.gz
+            elif command -v wget > /dev/null ;then
+                wget -P $BASE_PATH/tar $BASE_DOWNLOAD_URL$VERSION.$GOHOSTOS-amd64.tar.gz
+            else
+                printf -- "\t安装wget后重试...\n"
+                exit
+            fi
+        fi
+
+    	printf -- "[2/4] 开始解压...\n"
+
+        if [[ ! -d $BASE_PATH/$VERSION ]] ;then
+            tar -xvzf $BASE_PATH/tar/$VERSION.$GOHOSTOS-amd64.tar.gz -C $BASE_PATH
+            mv $BASE_PATH/go $BASE_PATH/$VERSION
+        fi
+
+    	printf -- "[3/4] 开始安装...\n"
+
+    	printf -- "[4/4] 安装完成"
+
+    	gvm sersion
+    fi
+
+    if [[ $1 == "remove" || $1 == "uninstall" || $1 == "rm" && $2 != "" ]];then
+    	printf -- "卸载$\n"
+    fi
+
+    if [[ $1 == "use" ||  $1 == "select" && $2 != "" ]];then
+    	printf -- "选择版本\n"
+    fi
+
+    if [[ $1 == "version" || $1 == "-v" ]] ; then
+        if command -v go > /dev/null ;then
+            go version
+        fi
+    fi
+
+	printf -- "安装成功\n"
+
+}
+
+
+
+
