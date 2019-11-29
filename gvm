@@ -95,12 +95,12 @@ set -o pipefail
         fi
 
     	printf -- "[3/4] 开始安装...\n"
-            setenv $VERSION
             if [[ ! $GVM  ]]; then
                 setinit="source $GVMRC"
                 [[ -e $HOME/.zshrc ]] &&  echo $setinit >> $HOME/.zshrc && source $HOME/.zshrc
                 [[ -e $HOME/.bashrc ]] &&  echo $setinit >> $HOME/.bashrc && source $HOME/.bashrc
             fi
+            setenv $VERSION
     	printf -- "[4/4] 安装完成\n"
         source $GVMRC
     	gvm sersion
