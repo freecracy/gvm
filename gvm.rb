@@ -1,7 +1,7 @@
 # Documentation: https://docs.brew.sh/Formula-Cookbook
 #                https://www.rubydoc.info/github/Homebrew/brew/master/Formula
 # PLEASE REMOVE ALL GENERATED COMMENTS BEFORE SUBMITTING YOUR PULL REQUEST!
-class Watermark < Formula
+class Gvm < Formula
   desc "gvm"
   homepage "https://github.com/freecracy/gvm"
   url "https://raw.githubusercontent.com/freecracy/gvm/master/gvm"

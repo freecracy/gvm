@@ -3,10 +3,12 @@ go语言版本管理,自用,非侵入.
 
 # 安装
 
+## 普通安装
 ```bash
 curl https://raw.githubusercontent.com/freecracy/gvm/master/scripts/install | sh
 ```
 
+## brew 安装
 ```sh
 brew tap freecracy/gvm http://github.com/freecracy/gvm
 ```
