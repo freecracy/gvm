@@ -21,10 +21,13 @@ set -o pipefail
     [[ $(uname -s) == "Darwin" ]] && GOHOSTOS="darwin"
 
     if [[ ! -d $BASE_PATH/dl ]]; then
-        git clone $VERSION_REPO $BASE_PATH/dl > /dev/null 2>&1 || { printf -- " 安装git后重试\n" ; exit;}
+        git clone $VERSION_REPO $BASE_PATH/dl >/dev/null 2>&1 || {
+            printf -- " 安装git后重试\n"
+            exit
+        }
     fi
 
-    if [[ $1 == "help" || $1 == "-h" || $1 = "" ]] ; then
+    if [[ $1 == "help" || $1 == "-h" || $1 == "" ]]; then
         printf -- "Use Age:\n"
         printf -- "    gvm list \v 列出已安装版本\n"
         printf -- "    gvm list all \v 列出用版本\n"
@@ -35,16 +38,16 @@ set -o pipefail
         printf -- "    gvm [help|-h] \v 显示帮助信息\n"
     fi
 
-    if [[  $1 == "list" && $2 == "" ]];then
+    if [[ $1 == "list" && $2 == "" ]]; then
         printf -- "已安装以下版本:\n"
 
     fi
 
-    if [[ $1 ==  "list" && $2 == "all" ]];then
+    if [[ $1 == "list" && $2 == "all" ]]; then
         printf -- "可选版本:\n"
 
         versionlist=
-        for version in $(ls $BASE_PATH/dl | grep -E "go[0-9]?\.[0-9]{1,2}" | grep -v 'beta' |grep -v 'rc');do
+        for version in $(ls $BASE_PATH/dl | grep -E "go[0-9]?\.[0-9]{1,2}" | grep -v 'beta' | grep -v 'rc'); do
             versionlist+=$version" "
         done
 
@@ -52,7 +55,7 @@ set -o pipefail
         printf -- "\n"
     fi
 
-    function setenv(){
+    function setenv() {
         VERSION=$1
         GVM=true
         GVMVERSION=$VERSION
@@ -64,11 +67,11 @@ set -o pipefail
         gvmrc+="export GOROOT=$GOROOT;"
         gvmrc+="export GOPATH=$GOPATH;"
         gvmrc+="export PATH=$GOBIN:$GOROOT/bin:$PATH;"
-        echo $gvmrc > $GVMRC
+        echo $gvmrc >$GVMRC
         source $GVMRC
     }
 
-    if [[ $1 == "add" || $1 == "install" && $2 != "" ]];then
+    if [[ $1 == "add" || $1 == "install" && $2 != "" ]]; then
         printf -- "[1/4] 开始下载...\n"
 
         VERSION=$2
@@ -76,10 +79,10 @@ set -o pipefail
         downloadfile=$BASE_PATH/tar/$downloadfilename
         downloadurl=$BASE_DOWNLOAD_URL$downloadfilename
 
-        if [[ ! -e $downloadfile ]] ; then
-            if command -v curl > /dev/null ;then
-                curl -L $BASE_DOWNLOAD_URL$VERSION.$GOHOSTOS-amd64.tar.gz > $BASE_PATH/tar/$VERSION.$GOHOSTOS-amd64.tar.gz
-            elif command -v wget > /dev/null ;then
+        if [[ ! -e $downloadfile ]]; then
+            if command -v curl >/dev/null; then
+                curl -L $BASE_DOWNLOAD_URL$VERSION.$GOHOSTOS-amd64.tar.gz >$BASE_PATH/tar/$VERSION.$GOHOSTOS-amd64.tar.gz
+            elif command -v wget >/dev/null; then
                 wget -P $BASE_PATH/tar $BASE_DOWNLOAD_URL$VERSION.$GOHOSTOS-amd64.tar.gz
             else
                 printf -- "\t安装wget后重试...\n"
@@ -89,45 +92,44 @@ set -o pipefail
 
         printf -- "[2/4] 开始解压...\n"
 
-        if [[ ! -d $BASE_PATH/$VERSION ]] ;then
+        if [[ ! -d $BASE_PATH/$VERSION ]]; then
             tar -xvzf $BASE_PATH/tar/$VERSION.$GOHOSTOS-amd64.tar.gz -C $BASE_PATH
             mv $BASE_PATH/go $BASE_PATH/$VERSION
         fi
 
         printf -- "[3/4] 开始安装...\n"
-            if [[ ! $GVM  ]]; then
-                setinit="source $GVMRC"
-                [[ -e $HOME/.zshrc ]] &&  echo $setinit >> $HOME/.zshrc && source $HOME/.zshrc
-                [[ -e $HOME/.bashrc ]] &&  echo $setinit >> $HOME/.bashrc && source $HOME/.bashrc
-            fi
-            setenv $VERSION
+        if [[ ! $GVM ]]; then
+            setinit="source $GVMRC"
+            [[ -e $HOME/.zshrc ]] && echo $setinit >>$HOME/.zshrc && source $HOME/.zshrc
+            [[ -e $HOME/.bashrc ]] && echo $setinit >>$HOME/.bashrc && source $HOME/.bashrc
+        fi
+        setenv $VERSION
         printf -- "[4/4] 安装完成\n"
         source $GVMRC
         gvm sersion
     fi
 
-    if [[ $1 == "remove" || $1 == "uninstall" || $1 == "rm" && $2 != "" ]];then
+    if [[ $1 == "remove" || $1 == "uninstall" || $1 == "rm" && $2 != "" ]]; then
         printf -- "卸载$2\n"
-        if [[ $2 == "gvm" ]];then
-            sudo rm -rf /usr/local/bin/gvm && rm -rf $BASE_PATH && rm -rf  $GVMRC
+        if [[ $2 == "gvm" ]]; then
+            sudo rm -rf /usr/local/bin/gvm && rm -rf $BASE_PATH && rm -rf $GVMRC
         fi
-        if [[ -d $BASE_PATH/$2 ]] ;then
+        if [[ -d $BASE_PATH/$2 ]]; then
             rm -rf $BASE_PATH/$2
             [[ -f $GOPATH/bin/go ]] && rm -rf $GOPATH/bin/go
         fi
     fi
 
-    if [[ $1 == "use" ||  $1 == "select" && $2 != "" ]];then
+    if [[ $1 == "use" || $1 == "select" && $2 != "" ]]; then
         VERSION=$2
         printf -- "选择版本$VERSION\n"
         setenv $VERSION
         source $GVMRC
     fi
 
-    if [[ $1 == "version" || $1 == "-v" ]] ; then
-        if command -v go > /dev/null ;then
+    if [[ $1 == "version" || $1 == "-v" ]]; then
+        if command -v go >/dev/null; then
             go version
         fi
     fi
 }
-
